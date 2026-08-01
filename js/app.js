@@ -125,6 +125,7 @@
     materiFallbackTeks: document.getElementById("materiFallbackTeks"),
     tombolPlayMateri: document.getElementById("tombolPlayMateri"),
     petunjukMateri: document.getElementById("petunjukMateri"),
+    tombolUlangiMateri: document.getElementById("tombolUlangiMateri"),
     tombolLanjutMateri: document.getElementById("tombolLanjutMateri"),
 
     // Game
@@ -240,15 +241,17 @@
     el.materiFallbackTeks.textContent = MATERI.ceritaCadangan;
     el.videoMateri.style.display = "";
     el.tombolPlayMateri.hidden = false;
+    el.tombolUlangiMateri.hidden = true;
     el.tombolLanjutMateri.hidden = true;
-    el.petunjukMateri.textContent = 'Tombol "Lanjut" akan muncul setelah video selesai ditonton.';
+    el.petunjukMateri.textContent = "Tombol pilihan akan muncul setelah video selesai ditonton.";
 
     kawanKatakan("Simak dulu videonya ya, baru kita main!", 3500);
   }
 
   function tandaiMateriSelesai() {
+    el.tombolUlangiMateri.hidden = false;
     el.tombolLanjutMateri.hidden = false;
-    el.petunjukMateri.textContent = "Bagus! Sekarang kamu bisa mulai bermain.";
+    el.petunjukMateri.textContent = "Bagus! Mau menonton lagi atau langsung bermain?";
     kawanKatakan("Siap bermain? Ayo! 🎉", 2500);
   }
 
@@ -262,6 +265,11 @@
     state.materiTimerCadangan = window.setTimeout(() => {
       tandaiMateriSelesai();
     }, MATERI.durasiCadangan);
+  }
+
+  function pasangListenerSekaliMateri() {
+    el.videoMateri.addEventListener("ended", tandaiMateriSelesai, { once: true });
+    el.videoMateri.addEventListener("error", aktifkanModeCadanganMateri, { once: true });
   }
 
   el.tombolPlayMateri.addEventListener("click", () => {
@@ -278,8 +286,7 @@
         el.videoMateri.currentTime = state.materiMaxDitonton;
       }
     });
-    el.videoMateri.addEventListener("ended", tandaiMateriSelesai, { once: true });
-    el.videoMateri.addEventListener("error", aktifkanModeCadanganMateri, { once: true });
+    pasangListenerSekaliMateri();
     // Jaga-jaga: jika sempat salah mendeteksi error padahal videonya akhirnya
     // berhasil diputar, sembunyikan lagi tulisan cadangan begitu video benar-benar jalan.
     el.videoMateri.addEventListener("playing", () => {
@@ -295,6 +302,22 @@
     if (janji && typeof janji.catch === "function") {
       janji.catch(aktifkanModeCadanganMateri);
     }
+  });
+
+  el.tombolUlangiMateri.addEventListener("click", () => {
+    el.tombolUlangiMateri.hidden = true;
+    el.tombolLanjutMateri.hidden = true;
+    el.petunjukMateri.textContent = "Tombol pilihan akan muncul setelah video selesai ditonton.";
+    kawanKatakan("Ayo tonton sekali lagi!", 2500);
+
+    if (state.materiModeCadangan) {
+      state.materiModeCadangan = false; // reset supaya cerita cadangan bisa tampil ulang
+      aktifkanModeCadanganMateri();
+      return;
+    }
+    el.videoMateri.currentTime = 0;
+    pasangListenerSekaliMateri();
+    el.videoMateri.play();
   });
 
   el.tombolLanjutMateri.addEventListener("click", () => {
@@ -463,6 +486,7 @@
       el.popupPesan.classList.remove("pesan-benar");
       el.popupPesan.classList.add("pesan-salah");
 
+      putarSuaraSalah();
       kawanKatakan("Coba perhatikan lagi ekspresinya ya!", 2500);
     }
   }
@@ -543,6 +567,46 @@
     } catch (err) {
       // Jika Web Audio API tidak didukung perangkat, permainan tetap lanjut tanpa suara.
       console.warn("Suara tidak dapat diputar:", err);
+    }
+  }
+
+  function buatNadaSalah(ctx, frekuensi, waktuMulai, durasi) {
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = frekuensi;
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, waktuMulai);
+    gain.gain.linearRampToValueAtTime(0.16, waktuMulai + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, waktuMulai + durasi);
+
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(waktuMulai);
+    osc.stop(waktuMulai + durasi);
+  }
+
+  function putarSuaraSalah() {
+    // Nada pendek turun (lembut, tidak menakutkan) sebagai tanda "belum tepat".
+    try {
+      const ctx = ambilAudioCtx();
+      buatNadaSalah(ctx, 392.0, ctx.currentTime, 0.22);
+      buatNadaSalah(ctx, 329.63, ctx.currentTime + 0.16, 0.26);
+    } catch (err) {
+      console.warn("Suara tidak dapat diputar:", err);
+    }
+
+    // Tambahan: ucapkan "Salah, coba lagi ya" lewat suara bawaan perangkat (jika didukung).
+    try {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        const ucapan = new SpeechSynthesisUtterance("Salah, coba lagi ya");
+        ucapan.lang = "id-ID";
+        ucapan.rate = 0.95;
+        ucapan.pitch = 1.05;
+        window.speechSynthesis.speak(ucapan);
+      }
+    } catch (err) {
+      console.warn("Suara ucapan tidak didukung perangkat ini:", err);
     }
   }
 
