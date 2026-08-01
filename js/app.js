@@ -7,8 +7,8 @@
        senang.mp4, sedih.mp4, marah.mp4, takut.mp4, bangga.mp4
    - Jika video belum ada, aplikasi TETAP BISA DIMAINKAN karena akan
      otomatis menampilkan mode cadangan (fallback) berupa cerita singkat.
-   - "STOP_TIME" adalah detik ke berapa video akan berhenti otomatis
-     sebelum pertanyaan muncul. Ubah angka ini sesuai video guru.
+   - Pertanyaan akan muncul otomatis setelah video selesai diputar sampai
+     habis (tidak berhenti di tengah).
    ========================================================================= */
 
 (function () {
@@ -22,7 +22,6 @@
       label: "Senang",
       emoji: "😄",
       video: "assets/videos/senang.mp4",
-      stopTime: 10,
       mulutPath: "M 75 130 Q 100 155 125 130",
       ceritaCadangan: "Budi mendapat hadiah ulang tahun. Budi tersenyum lebar.",
     },
@@ -31,7 +30,6 @@
       label: "Sedih",
       emoji: "😢",
       video: "assets/videos/sedih.mp4",
-      stopTime: 10,
       mulutPath: "M 75 138 Q 100 116 125 138",
       ceritaCadangan: "Mainan kesayangan Sari terjatuh dan rusak. Sari menangis.",
     },
@@ -40,7 +38,6 @@
       label: "Marah",
       emoji: "😠",
       video: "assets/videos/marah.mp4",
-      stopTime: 10,
       mulutPath: "M 76 131 L 124 131",
       ceritaCadangan: "Adik mengambil pensil Rani tanpa izin. Rani kesal dan cemberut.",
     },
@@ -49,7 +46,6 @@
       label: "Takut",
       emoji: "😱",
       video: "assets/videos/takut.mp4",
-      stopTime: 10,
       mulutPath: "M 90 120 Q 100 148 110 120 Q 100 132 90 120",
       ceritaCadangan: "Tiba-tiba terdengar suara petir yang keras. Doni terkejut dan bersembunyi.",
     },
@@ -58,7 +54,6 @@
       label: "Bangga",
       emoji: "🫡",
       video: "assets/videos/bangga.mp4",
-      stopTime: 10,
       mulutPath: "M 78 129 Q 100 148 122 132",
       ceritaCadangan: "Made berhasil merapikan tempat tidurnya sendiri tanpa dibantu.",
     },
@@ -344,17 +339,7 @@
     el.popupPertanyaan.hidden = true;
   }
 
-  /* ------------------------- 8. MEMUTAR VIDEO & DETEKSI STOP TIME ------------------------- */
-
-  function tanganiTimeUpdate() {
-    const level = LEVELS[state.levelIndex];
-    const batas = Math.min(level.stopTime, (el.video.duration || level.stopTime) - 0.05);
-    if (el.video.currentTime >= batas) {
-      el.video.pause();
-      el.video.removeEventListener("timeupdate", tanganiTimeUpdate);
-      munculkanPopup();
-    }
-  }
+  /* ------------------------- 8. MEMUTAR VIDEO SAMPAI SELESAI ------------------------- */
 
   function aktifkanModeCadangan() {
     if (state.videoModeCadangan) return; // sudah aktif, jangan diulang
@@ -375,11 +360,9 @@
     el.tombolPlayVideo.hidden = true;
     const level = LEVELS[state.levelIndex];
 
-    el.video.addEventListener("timeupdate", tanganiTimeUpdate);
     el.video.addEventListener(
       "ended",
       () => {
-        el.video.removeEventListener("timeupdate", tanganiTimeUpdate);
         if (!el.popupPertanyaan.hidden) return;
         munculkanPopup();
       },
@@ -414,7 +397,14 @@
     }
     el.video.currentTime = 0;
     el.video.play();
-    el.video.addEventListener("timeupdate", tanganiTimeUpdate);
+    el.video.addEventListener(
+      "ended",
+      () => {
+        if (!el.popupPertanyaan.hidden) return;
+        munculkanPopup();
+      },
+      { once: true }
+    );
     el.tombolUlangiVideo.hidden = true;
   });
 
