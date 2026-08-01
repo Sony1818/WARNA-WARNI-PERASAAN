@@ -87,6 +87,7 @@
   const state = {
     nama: "",
     levelIndex: 0,
+    urutanLevel: [0, 1, 2, 3, 4],
     skor: 0,
     levelSudahBenar: false,
     videoModeCadangan: false,
@@ -200,12 +201,55 @@
     if (namaTerakhir) el.inputNama.value = namaTerakhir;
   }
 
+  /* ------------------------- 5b. NARASI SUARA "TUNAS" (Web Speech API) ------------------------- */
+  // Karakter pemandu "Tunas" mengucapkan naskah singkat di beberapa layar kunci.
+  // Nada bicara (rate/pitch) disesuaikan kasar dengan suasana tiap naskah.
+
+  const NASKAH_TUNAS = {
+    nama: {
+      teks:
+        "Sebelum bermain, silakan ketik namamu terlebih dahulu. Setelah itu tekan tombol mulai. Aku sudah tidak sabar bermain bersamamu.",
+      rate: 0.95,
+      pitch: 1.05,
+    },
+    hasil: {
+      teks:
+        "Hebat! Kamu sudah menyelesaikan permainan Warna-Warni Perasaan. Terima kasih sudah belajar mengenal berbagai macam perasaan bersama Tunas. Ayo lihat hasil yang sudah kamu peroleh.",
+      rate: 1,
+      pitch: 1.15,
+    },
+    sertifikat: {
+      teks:
+        "Selamat! Kamu telah berhasil menyelesaikan seluruh tantangan. Aku bangga padamu. Teruslah belajar mengenali perasaan diri sendiri dan perasaan orang lain. Sampai jumpa pada petualangan berikutnya. Dadah!",
+      rate: 0.95,
+      pitch: 1.1,
+    },
+  };
+
+  function ucapkanNaskahTunas(idNaskah) {
+    const naskah = NASKAH_TUNAS[idNaskah];
+    if (!naskah) return;
+    try {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        const ucapan = new SpeechSynthesisUtterance(naskah.teks);
+        ucapan.lang = "id-ID";
+        ucapan.rate = naskah.rate;
+        ucapan.pitch = naskah.pitch;
+        window.speechSynthesis.speak(ucapan);
+      }
+    } catch (err) {
+      console.warn("Narasi suara tidak didukung perangkat ini:", err);
+    }
+  }
+
   el.tombolMulaiSambutan.addEventListener("click", () => {
     // Ketukan pertama ini juga yang "membuka" izin audio dari browser,
-    // sehingga musik latar bisa mulai diputar otomatis di layar-layar berikutnya.
+    // sehingga musik latar & narasi suara bisa mulai diputar otomatis di layar-layar berikutnya.
     MusikLatar.mulai("nama");
     tampilkanLayar("layarNama");
     el.inputNama.focus();
+    ucapkanNaskahTunas("nama");
   });
 
   el.formNama.addEventListener("submit", (event) => {
@@ -216,6 +260,7 @@
     state.nama = nama;
     state.levelIndex = 0;
     state.skor = 0;
+    state.urutanLevel = acakUrutan(LEVELS.map((_, i) => i));
 
     localStorage.setItem(KUNCI_NAMA_TERAKHIR, nama);
 
@@ -223,6 +268,16 @@
     tampilkanLayar("layarMateri");
     muatMateri();
   });
+
+  // Mengacak urutan array dengan algoritma Fisher-Yates
+  function acakUrutan(larik) {
+    const hasil = larik.slice();
+    for (let i = hasil.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [hasil[i], hasil[j]] = [hasil[j], hasil[i]];
+    }
+    return hasil;
+  }
 
   /* ------------------------- 6b. LAYAR MATERI (wajib ditonton sampai selesai) ------------------------- */
 
@@ -328,7 +383,7 @@
   /* ------------------------- 7. MEMUAT SETIAP LEVEL ------------------------- */
 
   function muatLevel(index) {
-    const level = LEVELS[index];
+    const level = LEVELS[state.urutanLevel[index]];
     state.levelIndex = index;
     state.levelSudahBenar = false;
     state.videoModeCadangan = false;
@@ -367,7 +422,7 @@
   function aktifkanModeCadangan() {
     if (state.videoModeCadangan) return; // sudah aktif, jangan diulang
     state.videoModeCadangan = true;
-    const level = LEVELS[state.levelIndex];
+    const level = LEVELS[state.urutanLevel[state.levelIndex]];
 
     document.getElementById("videoLevel").style.display = "none";
     el.videoFallback.hidden = false;
@@ -381,7 +436,7 @@
 
   el.tombolPlayVideo.addEventListener("click", () => {
     el.tombolPlayVideo.hidden = true;
-    const level = LEVELS[state.levelIndex];
+    const level = LEVELS[state.urutanLevel[state.levelIndex]];
 
     el.video.addEventListener(
       "ended",
@@ -459,7 +514,7 @@
   function evaluasiJawaban(idDipilih, tombolElemen) {
     if (state.levelSudahBenar) return; // sudah benar, tunggu klik "Lanjut"
 
-    const level = LEVELS[state.levelIndex];
+    const level = LEVELS[state.urutanLevel[state.levelIndex]];
     const benar = idDipilih === level.id;
 
     if (benar) {
@@ -474,6 +529,7 @@
       el.popupPesan.classList.add("pesan-benar");
 
       putarSuaraTepukTangan();
+      ucapkanSelamat();
       kawanKatakan("Horeee, betul! 🎉", 2500);
 
       el.tombolLanjut.hidden = false;
@@ -567,6 +623,22 @@
     } catch (err) {
       // Jika Web Audio API tidak didukung perangkat, permainan tetap lanjut tanpa suara.
       console.warn("Suara tidak dapat diputar:", err);
+    }
+  }
+
+  function ucapkanSelamat() {
+    // Ucapkan "Selamat, kamu benar!" lewat suara bawaan perangkat (jika didukung).
+    try {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        const ucapan = new SpeechSynthesisUtterance("Selamat, kamu benar!");
+        ucapan.lang = "id-ID";
+        ucapan.rate = 1;
+        ucapan.pitch = 1.15;
+        window.speechSynthesis.speak(ucapan);
+      }
+    } catch (err) {
+      console.warn("Suara ucapan tidak didukung perangkat ini:", err);
     }
   }
 
@@ -738,6 +810,7 @@
     el.bintangHasil.textContent = "⭐".repeat(jumlahBintang) + "☆".repeat(5 - jumlahBintang);
 
     tampilkanLayar("layarHasil");
+    ucapkanNaskahTunas("hasil");
   }
 
   el.tombolMainLagi.addEventListener("click", () => {
@@ -751,6 +824,7 @@
     MusikLatar.mulai("sertifikat");
     tampilkanLayar("layarSertifikat");
     gambarSertifikat();
+    ucapkanNaskahTunas("sertifikat");
   });
 
   el.tombolKembaliHasil.addEventListener("click", () => {
