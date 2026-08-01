@@ -475,6 +475,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   text-align: center;
   padding: 20px;
 }
+.video-fallback[hidden] { display: none; }
 .fallback-wajah {
   font-size: 5rem;
   animation: fallbackGoyang 2.2s ease-in-out infinite;
