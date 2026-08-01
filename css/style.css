@@ -1,0 +1,639 @@
+/* =========================================================
+   WARNA-WARNI PERASAAN — Gaya Visual
+   Palet warna terinspirasi dari 5 emosi yang diajarkan.
+   Font "Baloo 2" (judul, bulat & ramah) + "Nunito" (isi, mudah dibaca).
+   ========================================================= */
+
+:root {
+  /* Warna dasar */
+  --krem: #fff9f0;
+  --krem-kartu: #ffffff;
+  --tinta: #3a3357;
+  --tinta-lembut: #6b6486;
+
+  /* Warna tiap emosi (dipakai konsisten di seluruh aplikasi) */
+  --c-senang: #ffcb47;
+  --c-senang-gelap: #e0a800;
+  --c-sedih: #5aa9e6;
+  --c-sedih-gelap: #2f7dc0;
+  --c-marah: #ff6b57;
+  --c-marah-gelap: #e04327;
+  --c-takut: #8e7cc3;
+  --c-takut-gelap: #6a55a8;
+  --c-bangga: #4fbf8b;
+  --c-bangga-gelap: #2f9a6b;
+
+  --c-benar: #4fbf8b;
+  --c-salah: #ff6b57;
+
+  --radius-besar: 32px;
+  --radius-sedang: 20px;
+  --radius-kecil: 14px;
+  --bayangan: 0 10px 30px rgba(58, 51, 87, 0.12);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--krem);
+  color: var(--tinta);
+  font-family: 'Nunito', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Latar lembut bergradasi supaya tidak polos, tapi tidak mencolok/menyilaukan */
+body {
+  background:
+    radial-gradient(circle at 12% 15%, #ffe9c2 0%, transparent 40%),
+    radial-gradient(circle at 88% 20%, #cfe8ff 0%, transparent 38%),
+    radial-gradient(circle at 50% 95%, #d8f5e6 0%, transparent 40%),
+    var(--krem);
+}
+
+h1, h2, h3 { font-family: 'Baloo 2', sans-serif; margin: 0; }
+
+button { font-family: inherit; cursor: pointer; }
+
+/* Hormati pengguna yang meminta gerakan lebih sedikit */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Fokus keyboard selalu terlihat jelas */
+a:focus-visible, button:focus-visible, input:focus-visible {
+  outline: 4px solid #2f7dc0;
+  outline-offset: 3px;
+}
+
+/* =========================================================
+   LAYOUT LAYAR (setiap "halaman" adalah section yang di show/hide)
+   ========================================================= */
+.layar {
+  display: none;
+  min-height: 100vh;
+  width: 100%;
+  padding: 24px 16px 60px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.layar-aktif { display: flex; }
+
+.kartu {
+  background: var(--krem-kartu);
+  border-radius: var(--radius-besar);
+  box-shadow: var(--bayangan);
+  padding: 40px 32px;
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+}
+
+/* =========================================================
+   KAWAN WARNA — karakter pemandu (SVG, berubah warna & wajah)
+   ========================================================= */
+.kawan-wrap {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+}
+.kawan-badan {
+  fill: var(--c-senang);
+  transition: fill 0.6s ease;
+}
+.mata { fill: var(--tinta); }
+.mulut {
+  fill: none;
+  stroke: var(--tinta);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: d 0.4s ease;
+}
+.kawan {
+  filter: drop-shadow(0 6px 10px rgba(58,51,87,0.18));
+  animation: kawanNapas 3.5s ease-in-out infinite;
+}
+@keyframes kawanNapas {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.kawan-bicara {
+  background: #fff;
+  border-radius: var(--radius-kecil);
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--tinta);
+  box-shadow: var(--bayangan);
+  max-width: 190px;
+  margin-bottom: 14px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.kawan-bicara.tampil { opacity: 1; transform: translateY(0); }
+
+/* =========================================================
+   HIASAN LATAR — bentuk mengambang di setiap layar, bikin suasana ceria
+   ========================================================= */
+.layar { position: relative; overflow: hidden; }
+
+.hiasan-latar {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.htk {
+  position: absolute;
+  font-size: 2.2rem;
+  opacity: 0.4;
+  animation: mengambang 7s ease-in-out infinite;
+  filter: drop-shadow(0 4px 6px rgba(58,51,87,0.08));
+}
+.h1 { left: 6%;  top: 10%; font-size: 2.6rem; animation-delay: 0s; }
+.h2 { left: 88%; top: 16%; font-size: 2rem;   animation-delay: 1.1s; }
+.h3 { left: 12%; top: 78%; font-size: 2.8rem; animation-delay: 0.5s; }
+.h4 { left: 80%; top: 72%; font-size: 1.8rem; animation-delay: 1.7s; }
+.h5 { left: 46%; top: 6%;  font-size: 2.2rem; animation-delay: 2.2s; }
+.h6 { left: 93%; top: 55%; font-size: 1.9rem; animation-delay: 0.8s; }
+
+@keyframes mengambang {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(8deg); }
+}
+
+/* Versi lebih redup untuk layar yang butuh fokus (materi & permainan) */
+.hiasan-redup .htk { opacity: 0.16; }
+
+/* Kartu & konten selalu di atas hiasan */
+.kartu, .bar-atas, .label-level, .panggung-video, .tombol-ulangi, .popup-overlay {
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================================================
+   TOMBOL MUSIK — tombol bulat mengambang, ada di semua layar
+   ========================================================= */
+.tombol-musik {
+  position: fixed;
+  left: 16px;
+  top: 16px;
+  z-index: 45;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  font-size: 1.4rem;
+  box-shadow: var(--bayangan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tombol-musik:active { transform: translateY(2px); }
+
+/* =========================================================
+   LAYAR SAMBUTAN (halaman utama)
+   ========================================================= */
+.kartu-sambutan { position: relative; }
+.logo-sekolah {
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 6px 10px rgba(58,51,87,0.15));
+  animation: chipMuncul 0.6s ease both;
+}
+.petunjuk-musik {
+  margin-top: 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--tinta-lembut);
+}
+
+/* =========================================================
+   LAYAR ISI NAMA
+   ========================================================= */
+.kartu-nama { max-width: 460px; }
+.ikon-nama {
+  font-size: 3.2rem;
+  margin-bottom: 6px;
+  animation: kawanNapas 2.4s ease-in-out infinite;
+}
+.judul-nama { font-size: 1.7rem; margin-bottom: 20px; }
+
+/* =========================================================
+   BERANDA
+   ========================================================= */
+.judul-app {
+  font-size: 2.4rem;
+  line-height: 1.15;
+  font-weight: 800;
+}
+.judul-warna1 { color: var(--c-senang-gelap); }
+.judul-strip { color: var(--tinta-lembut); }
+.judul-warna2 { color: var(--c-sedih-gelap); }
+.judul-perasaan { color: var(--c-bangga-gelap); }
+
+.subjudul {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--tinta-lembut);
+  margin: 10px 0 22px;
+}
+
+.preview-emosi {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.chip-emosi {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  box-shadow: var(--bayangan);
+  animation: chipMuncul 0.6s ease both;
+}
+.chip-senang { background: #fff3cf; animation-delay: 0.05s; }
+.chip-sedih  { background: #e2f0ff; animation-delay: 0.15s; }
+.chip-marah  { background: #ffe3de; animation-delay: 0.25s; }
+.chip-takut  { background: #ece5f9; animation-delay: 0.35s; }
+.chip-bangga { background: #dff6ec; animation-delay: 0.45s; }
+@keyframes chipMuncul {
+  from { opacity: 0; transform: scale(0.5) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.form-nama { display: flex; flex-direction: column; gap: 14px; }
+.label-nama { font-weight: 800; font-size: 1.05rem; text-align: left; }
+.input-nama {
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 700;
+  padding: 16px 18px;
+  border-radius: var(--radius-sedang);
+  border: 3px solid #eee2cf;
+  background: #fffdf9;
+  color: var(--tinta);
+}
+.input-nama:focus { border-color: var(--c-sedih); }
+
+.skor-terbaik {
+  margin-top: 20px;
+  font-weight: 800;
+  color: var(--c-bangga-gelap);
+  font-size: 1.05rem;
+}
+
+/* =========================================================
+   LAYAR MATERI (video pengantar sebelum bermain)
+   ========================================================= */
+.kartu-materi { max-width: 640px; }
+.judul-materi { font-size: 1.7rem; margin-bottom: 6px; }
+.subjudul-materi {
+  font-weight: 700;
+  color: var(--tinta-lembut);
+  margin: 0 0 20px;
+}
+.petunjuk-materi {
+  margin-top: 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--tinta-lembut);
+}
+.tombol-lanjut-materi {
+  margin-top: 16px;
+  background: linear-gradient(135deg, var(--c-bangga), var(--c-senang));
+  color: #26401f;
+}
+
+/* =========================================================
+   TOMBOL — besar, jelas, ramah motorik
+   ========================================================= */
+.tombol {
+  border: none;
+  border-radius: var(--radius-sedang);
+  background: #eee6ff;
+  color: var(--tinta);
+  font-weight: 800;
+  font-size: 1rem;
+  padding: 14px 22px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  box-shadow: 0 4px 0 rgba(58,51,87,0.15);
+}
+.tombol:hover { filter: brightness(1.04); }
+.tombol:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(58,51,87,0.15); }
+
+.tombol-besar {
+  font-size: 1.2rem;
+  padding: 18px 28px;
+  border-radius: 999px;
+}
+
+.tombol-mulai {
+  background: linear-gradient(135deg, var(--c-senang), var(--c-bangga));
+  color: #26401f;
+}
+.ikon-panah { display: inline-block; margin-left: 4px; }
+
+.tombol-ulangi {
+  margin-top: 14px;
+  background: #eef1ff;
+  color: var(--c-sedih-gelap);
+}
+
+.tombol-lanjut {
+  margin-top: 18px;
+  background: linear-gradient(135deg, var(--c-bangga), var(--c-sedih));
+  color: #ffffff;
+}
+
+.tombol-sertifikat {
+  background: linear-gradient(135deg, var(--c-takut), var(--c-sedih));
+  color: #fff;
+}
+.tombol-ulang-main {
+  background: #f1eee6;
+  color: var(--tinta);
+}
+.tombol-unduh {
+  background: linear-gradient(135deg, var(--c-bangga), var(--c-senang));
+  color: #26401f;
+}
+
+.tombol-grup {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+/* =========================================================
+   LAYAR PERMAINAN
+   ========================================================= */
+#layarGame { padding-top: 18px; }
+
+.bar-atas {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.progress-wrap {
+  flex: 1;
+  background: #efe9da;
+  border-radius: 999px;
+  height: 26px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+}
+.progress-isi {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--c-senang), var(--c-bangga));
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+.progress-teks {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--tinta);
+}
+
+.skor-berjalan {
+  font-weight: 800;
+  font-size: 1.05rem;
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 14px;
+  box-shadow: var(--bayangan);
+  white-space: nowrap;
+}
+
+.label-level {
+  font-size: 1.6rem;
+  margin: 6px 0 16px;
+  color: var(--tinta);
+}
+
+.panggung-video {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 16 / 9;
+  background: #241f38;
+  border-radius: var(--radius-besar);
+  overflow: hidden;
+  box-shadow: var(--bayangan);
+}
+.video-level {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.video-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+}
+.fallback-wajah {
+  font-size: 5rem;
+  animation: fallbackGoyang 2.2s ease-in-out infinite;
+}
+@keyframes fallbackGoyang {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+.fallback-teks { font-size: 0.85rem; opacity: 0.8; font-weight: 700; }
+
+.tombol-play-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(36, 31, 56, 0.35);
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  border-radius: var(--radius-besar);
+}
+.ikon-play {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--c-marah);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  box-shadow: var(--bayangan);
+}
+.tombol-play-overlay[hidden] { display: none; }
+
+/* =========================================================
+   POPUP PERTANYAAN
+   ========================================================= */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(58, 51, 87, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 50;
+}
+.popup-overlay[hidden] { display: none; }
+
+.popup-kartu {
+  background: #fff;
+  border-radius: var(--radius-besar);
+  padding: 30px 26px;
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--bayangan);
+  animation: popupNaik 0.35s ease both;
+}
+@keyframes popupNaik {
+  from { opacity: 0; transform: translateY(24px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.popup-pertanyaan {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.pilihan-emosi {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.tombol-emosi {
+  border: 4px solid transparent;
+  border-radius: var(--radius-sedang);
+  background: #f6f3ea;
+  padding: 14px 6px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--tinta);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.tombol-emosi .emoji-besar { font-size: 2.4rem; line-height: 1; }
+.tombol-emosi:hover { transform: translateY(-3px); }
+.tombol-emosi:disabled { opacity: 0.55; cursor: default; }
+
+.tombol-emosi.benar { border-color: var(--c-benar); background: #e4f8ef; }
+.tombol-emosi.salah { border-color: var(--c-salah); background: #ffe9e5; animation: goyangSalah 0.4s ease; }
+@keyframes goyangSalah {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+.popup-pesan {
+  min-height: 30px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  margin-top: 16px;
+}
+.popup-pesan.pesan-benar { color: var(--c-bangga-gelap); }
+.popup-pesan.pesan-salah { color: var(--c-marah-gelap); }
+
+/* =========================================================
+   LAYAR HASIL
+   ========================================================= */
+.judul-hasil { font-size: 1.9rem; margin-bottom: 6px; }
+.nama-hasil { font-weight: 800; font-size: 1.2rem; color: var(--c-sedih-gelap); }
+.skor-akhir { font-weight: 700; color: var(--tinta-lembut); margin-top: 18px; margin-bottom: 4px; }
+.skor-angka {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--c-bangga-gelap);
+  margin: 0;
+}
+.bintang-hasil { font-size: 2rem; margin-top: 10px; letter-spacing: 6px; }
+
+/* =========================================================
+   SERTIFIKAT
+   ========================================================= */
+.kartu-sertifikat { max-width: 700px; }
+#kanvasSertifikat {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sedang);
+  box-shadow: var(--bayangan);
+  display: block;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 560px) {
+  .judul-app { font-size: 1.9rem; }
+  .kartu { padding: 30px 20px; border-radius: var(--radius-sedang); }
+  .pilihan-emosi { grid-template-columns: repeat(2, 1fr); }
+  .skor-angka { font-size: 2.4rem; }
+  .kawan-wrap { transform: scale(0.75); right: 4px; bottom: 4px; }
+  .htk { font-size: 1.5rem !important; opacity: 0.3; }
+  .tombol-musik { width: 44px; height: 44px; font-size: 1.15rem; left: 10px; top: 10px; }
+  .logo-sekolah { width: 72px; height: 72px; }
+}
+
+@media (min-width: 900px) {
+  .kartu-beranda { padding: 56px 60px; }
+  .judul-app { font-size: 3rem; }
+}

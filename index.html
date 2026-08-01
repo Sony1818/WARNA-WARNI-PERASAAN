@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+<title>Warna-Warni Perasaan</title>
+<meta name="description" content="Game edukasi mengenal emosi untuk anak berkebutuhan khusus">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Karakter pemandu "Kawan Warna" muncul di semua layar -->
+<div class="kawan-wrap" id="kawanWrap" aria-hidden="true">
+  <svg class="kawan" id="kawanSvg" viewBox="0 0 200 200" width="90" height="90">
+    <circle class="kawan-badan" cx="100" cy="105" r="80"/>
+    <circle class="mata mata-kiri" cx="72" cy="95" r="10"/>
+    <circle class="mata mata-kanan" cx="128" cy="95" r="10"/>
+    <path class="mulut" id="kawanMulut" d="M 75 130 Q 100 150 125 130" />
+  </svg>
+  <div class="kawan-bicara" id="kawanBicara"></div>
+</div>
+
+<!-- Tombol musik latar — anak/guru bisa mematikan musik kapan saja -->
+<button id="tombolMusik" class="tombol-musik" aria-pressed="true" aria-label="Matikan musik latar">🔊</button>
+
+<!-- ====================== LAYAR 1: HALAMAN UTAMA ====================== -->
+<section id="layarSambutan" class="layar layar-aktif">
+  <div class="hiasan-latar" aria-hidden="true">
+    <span class="htk h1">⭐</span>
+    <span class="htk h2">🎈</span>
+    <span class="htk h3">☁️</span>
+    <span class="htk h4">✨</span>
+    <span class="htk h5">🌈</span>
+    <span class="htk h6">🎈</span>
+  </div>
+  <div class="kartu kartu-sambutan">
+    <img src="assets/gambar/logo-sekolah.png" alt="Logo SLBN Tompokersan Lumajang" class="logo-sekolah">
+    <h1 class="judul-app">
+      <span class="judul-warna1">Warna</span><span class="judul-strip">-</span><span class="judul-warna2">Warni</span>
+      <br><span class="judul-perasaan">Perasaan</span>
+    </h1>
+    <p class="subjudul">Ayo kenali perasaan bersama-sama! 🌈</p>
+
+    <div class="preview-emosi" aria-hidden="true">
+      <span class="chip-emosi chip-senang">😄</span>
+      <span class="chip-emosi chip-sedih">😢</span>
+      <span class="chip-emosi chip-marah">😠</span>
+      <span class="chip-emosi chip-takut">😱</span>
+      <span class="chip-emosi chip-bangga">🫡</span>
+    </div>
+
+    <button type="button" class="tombol tombol-besar tombol-mulai" id="tombolMulaiSambutan">
+      Mulai <span class="ikon-panah">▶</span>
+    </button>
+    <p class="petunjuk-musik">🎵 Musik akan mulai diputar ya</p>
+
+    <p class="skor-terbaik" id="skorTerbaikWrap" hidden>
+      🏆 Skor terbaikmu: <strong id="skorTerbaikNilai">0</strong>
+    </p>
+  </div>
+</section>
+
+<!-- ====================== LAYAR 1B: ISI NAMA ====================== -->
+<section id="layarNama" class="layar">
+  <div class="hiasan-latar" aria-hidden="true">
+    <span class="htk h1">🎈</span>
+    <span class="htk h2">⭐</span>
+    <span class="htk h3">✨</span>
+    <span class="htk h4">☁️</span>
+    <span class="htk h5">🎈</span>
+    <span class="htk h6">🌈</span>
+  </div>
+  <div class="kartu kartu-nama">
+    <div class="ikon-nama" aria-hidden="true">👋</div>
+    <h2 class="judul-nama">Siapa nama kamu?</h2>
+    <form id="formNama" class="form-nama" autocomplete="off">
+      <label for="inputNama" class="label-nama">Tulis namamu di sini</label>
+      <input type="text" id="inputNama" class="input-nama" placeholder="Contoh: Rani" maxlength="30" required>
+      <button type="submit" class="tombol tombol-besar tombol-mulai">
+        Lanjut <span class="ikon-panah">▶</span>
+      </button>
+    </form>
+  </div>
+</section>
+
+<!-- ====================== LAYAR MATERI (sebelum bermain) ====================== -->
+<section id="layarMateri" class="layar">
+  <div class="hiasan-latar hiasan-redup" aria-hidden="true">
+    <span class="htk h1">📖</span>
+    <span class="htk h2">✨</span>
+    <span class="htk h3">☁️</span>
+    <span class="htk h4">⭐</span>
+    <span class="htk h5">☁️</span>
+    <span class="htk h6">✨</span>
+  </div>
+  <div class="kartu kartu-materi">
+    <h2 class="judul-materi">📖 Yuk, Simak Dulu!</h2>
+    <p class="subjudul-materi">Tonton video ini sampai selesai ya, sebelum mulai bermain.</p>
+
+    <div class="panggung-video">
+      <video id="videoMateri" class="video-level" playsinline preload="metadata"></video>
+
+      <div class="video-fallback" id="materiFallback" hidden>
+        <div class="fallback-wajah">📖</div>
+        <p class="fallback-teks" id="materiFallbackTeks"></p>
+      </div>
+
+      <button class="tombol-play-overlay" id="tombolPlayMateri" aria-label="Tonton video materi">
+        <span class="ikon-play">▶</span>
+        <span>Tonton Video Materi</span>
+      </button>
+    </div>
+
+    <p class="petunjuk-materi" id="petunjukMateri">Tombol "Lanjut" akan muncul setelah video selesai ditonton.</p>
+
+    <button class="tombol tombol-besar tombol-lanjut-materi" id="tombolLanjutMateri" hidden>
+      Mulai Bermain ▶
+    </button>
+  </div>
+</section>
+
+<!-- ====================== LAYAR 2: PERMAINAN ====================== -->
+<section id="layarGame" class="layar">
+  <div class="hiasan-latar hiasan-redup" aria-hidden="true">
+    <span class="htk h1">⭐</span>
+    <span class="htk h2">✨</span>
+    <span class="htk h3">☁️</span>
+    <span class="htk h4">⭐</span>
+    <span class="htk h5">✨</span>
+    <span class="htk h6">☁️</span>
+  </div>
+  <div class="bar-atas">
+    <div class="progress-wrap" role="progressbar" aria-label="Progres level" aria-valuemin="0" aria-valuemax="5" id="progressBar">
+      <div class="progress-isi" id="progressIsi"></div>
+      <span class="progress-teks" id="progressTeks">Level 1 dari 5</span>
+    </div>
+    <div class="skor-berjalan">⭐ <span id="skorBerjalan">0</span></div>
+  </div>
+
+  <h2 class="label-level" id="labelLevel">Senang</h2>
+
+  <div class="panggung-video">
+    <video id="videoLevel" class="video-level" playsinline preload="metadata"></video>
+
+    <!-- Tampil jika video tidak tersedia -->
+    <div class="video-fallback" id="videoFallback" hidden>
+      <div class="fallback-wajah" id="fallbackWajah">🙂</div>
+      <p class="fallback-teks">(Video belum ditambahkan guru — cerita ditampilkan sebagai gambar)</p>
+    </div>
+
+    <button class="tombol-play-overlay" id="tombolPlayVideo" aria-label="Tonton video">
+      <span class="ikon-play">▶</span>
+      <span>Tonton Video</span>
+    </button>
+  </div>
+
+  <button class="tombol tombol-ulangi" id="tombolUlangiVideo" hidden>🔁 Tonton Lagi</button>
+
+  <!-- Popup pertanyaan -->
+  <div class="popup-overlay" id="popupPertanyaan" hidden>
+    <div class="popup-kartu">
+      <p class="popup-pertanyaan">Apa yang dirasakan karakter ini?</p>
+      <div class="pilihan-emosi" id="pilihanEmosi"><!-- tombol emoji dibuat lewat JS --></div>
+      <p class="popup-pesan" id="popupPesan" aria-live="polite"></p>
+      <button class="tombol tombol-besar tombol-lanjut" id="tombolLanjut" hidden>Lanjut ▶</button>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== LAYAR 3: HASIL ====================== -->
+<section id="layarHasil" class="layar">
+  <div class="hiasan-latar" aria-hidden="true">
+    <span class="htk h1">🎉</span>
+    <span class="htk h2">🎊</span>
+    <span class="htk h3">⭐</span>
+    <span class="htk h4">✨</span>
+    <span class="htk h5">🎈</span>
+    <span class="htk h6">🎊</span>
+  </div>
+  <div class="kartu kartu-hasil">
+    <h2 class="judul-hasil">🎉 Kerja Bagus! 🎉</h2>
+    <p class="nama-hasil" id="namaHasil"></p>
+    <p class="skor-akhir">Skor akhir kamu:</p>
+    <p class="skor-angka" id="skorAkhirAngka">0 / 50</p>
+
+    <div class="bintang-hasil" id="bintangHasil" aria-hidden="true"></div>
+
+    <div class="tombol-grup">
+      <button class="tombol tombol-besar tombol-sertifikat" id="tombolLihatSertifikat">🎓 Lihat Sertifikat</button>
+      <button class="tombol tombol-besar tombol-ulang-main" id="tombolMainLagi">🔁 Main Lagi</button>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== LAYAR 4: SERTIFIKAT ====================== -->
+<section id="layarSertifikat" class="layar">
+  <div class="hiasan-latar" aria-hidden="true">
+    <span class="htk h1">🎓</span>
+    <span class="htk h2">⭐</span>
+    <span class="htk h3">✨</span>
+    <span class="htk h4">🎉</span>
+    <span class="htk h5">⭐</span>
+    <span class="htk h6">✨</span>
+  </div>
+  <div class="kartu kartu-sertifikat">
+    <canvas id="kanvasSertifikat" width="1000" height="700"></canvas>
+    <div class="tombol-grup">
+      <button class="tombol tombol-besar tombol-unduh" id="tombolUnduhSertifikat">⬇ Unduh Sertifikat</button>
+      <button class="tombol tombol-besar" id="tombolKembaliHasil">← Kembali</button>
+    </div>
+  </div>
+</section>
+
+<audio id="audioMusikLatar" loop preload="none"></audio>
+
+<script src="js/app.js"></script>
+</body>
+</html>
