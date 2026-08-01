@@ -60,6 +60,8 @@
     <p class="skor-terbaik" id="skorTerbaikWrap" hidden>
       🏆 Skor terbaikmu: <strong id="skorTerbaikNilai">0</strong>
     </p>
+
+    <p class="kredit-app">Game dibuat oleh Sony Putra Dewantara</p>
   </div>
 </section>
 
@@ -114,11 +116,14 @@
       </button>
     </div>
 
-    <p class="petunjuk-materi" id="petunjukMateri">Tombol "Lanjut" akan muncul setelah video selesai ditonton.</p>
+    <p class="petunjuk-materi" id="petunjukMateri">Tombol pilihan akan muncul setelah video selesai ditonton.</p>
 
-    <button class="tombol tombol-besar tombol-lanjut-materi" id="tombolLanjutMateri" hidden>
-      Mulai Bermain ▶
-    </button>
+    <div class="tombol-grup">
+      <button class="tombol tombol-besar tombol-ulangi-materi" id="tombolUlangiMateri" hidden>🔁 Ulangi Video</button>
+      <button class="tombol tombol-besar tombol-lanjut-materi" id="tombolLanjutMateri" hidden>
+        Mulai Bermain ▶
+      </button>
+    </div>
   </div>
 </section>
 
@@ -157,14 +162,13 @@
     </button>
   </div>
 
-  <button class="tombol tombol-ulangi" id="tombolUlangiVideo" hidden>🔁 Tonton Lagi</button>
-
   <!-- Popup pertanyaan -->
   <div class="popup-overlay" id="popupPertanyaan" hidden>
     <div class="popup-kartu">
       <p class="popup-pertanyaan">Apa yang dirasakan karakter ini?</p>
       <div class="pilihan-emosi" id="pilihanEmosi"><!-- tombol emoji dibuat lewat JS --></div>
       <p class="popup-pesan" id="popupPesan" aria-live="polite"></p>
+      <button class="tombol tombol-ulangi" id="tombolUlangiVideo">🔁 Ulangi Video</button>
       <button class="tombol tombol-besar tombol-lanjut" id="tombolLanjut" hidden>Lanjut ▶</button>
     </div>
   </div>
