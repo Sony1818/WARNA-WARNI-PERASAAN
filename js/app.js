@@ -244,12 +244,14 @@
   }
 
   el.tombolMulaiSambutan.addEventListener("click", () => {
-    // Ketukan pertama ini juga yang "membuka" izin audio dari browser,
-    // sehingga musik latar & narasi suara bisa mulai diputar otomatis di layar-layar berikutnya.
-    MusikLatar.mulai("nama");
+    // Ketukan pertama ini juga yang "membuka" izin audio dari browser.
+    // Mainkan dulu musik halaman utama supaya benar-benar sempat terdengar,
+    // baru setelah beberapa detik berpindah ke musik layar isi nama.
+    MusikLatar.mulai("sambutan");
     tampilkanLayar("layarNama");
     el.inputNama.focus();
     ucapkanNaskahTunas("nama");
+    window.setTimeout(() => MusikLatar.mulai("nama"), 2500);
   });
 
   el.formNama.addEventListener("submit", (event) => {
